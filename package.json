@@ -14,12 +14,13 @@
     "@nestjs/common": "^11.1.14",
     "@nestjs/core": "^11.1.14",
     "@nestjs/platform-express": "^11.1.14",
-    "@prisma/client": "^7.4.1",
+    "@prisma/client": "^6.19.2",
     "@types/node": "^25.3.0",
+    "prisma": "^6.19.2",
     "ts-node": "^10.9.2",
     "typescript": "^5.9.3"
   },
   "devDependencies": {
-    "prisma": "^7.4.1"
+    "@prisma/internals": "^7.4.1"
   }
 }
