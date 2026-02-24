@@ -1,0 +1,23 @@
+// This is the Prisma schema file for PostgreSQL
+// Defines a User model with id, name, email, and role
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Role {
+  STUDENT
+  STAFF
+  ADMIN
+}
+
+model User {
+  id    Int    @id @default(autoincrement())
+  name  String
+  email String @unique
+  role  Role
+}
