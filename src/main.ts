@@ -1,7 +1,11 @@
 import { NestFactory } from '@nestjs/core';
-import { Module } from '@nestjs/common';
 
-@Module({})
+import { Module } from '@nestjs/common';
+import { UserModule } from './user/user.module';
+
+@Module({
+  imports: [UserModule],
+})
 class AppModule {}
 
 async function bootstrap() {
