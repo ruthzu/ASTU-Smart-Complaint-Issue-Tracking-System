@@ -4,9 +4,10 @@ import { ValidationPipe } from '@nestjs/common';
 import { Module } from '@nestjs/common';
 import { UserModule } from './user/user.module';
 import { AuthModule } from './auth/auth.module';
+import { ComplaintModule } from './complaint/complaint.module';
 
 @Module({
-  imports: [UserModule, AuthModule],
+  imports: [UserModule, AuthModule, ComplaintModule],
 })
 class AppModule {}
 
