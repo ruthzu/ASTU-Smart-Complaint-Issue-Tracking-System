@@ -1,4 +1,4 @@
-import { Controller, Get, Req, UnauthorizedException, UseGuards } from '@nestjs/common';
+import { Controller, Get, Patch, Param, Req, UnauthorizedException, UseGuards } from '@nestjs/common';
 import type { Request } from 'express';
 
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
@@ -17,5 +17,16 @@ export class NotificationController {
     }
 
     return this.notificationService.getNotificationsForUser(user.id);
+  }
+
+  @Patch(':id/read')
+  @UseGuards(JwtAuthGuard)
+  async markAsRead(@Param('id') id: string, @Req() request: Request) {
+    const user = request.user as { id?: number } | undefined;
+    if (!user?.id) {
+      throw new UnauthorizedException('User not authenticated');
+    }
+
+    return this.notificationService.markNotificationAsRead(id, user.id);
   }
 }

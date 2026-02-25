@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 
 import { PrismaService } from '../prisma/prisma.service';
 
@@ -21,6 +21,25 @@ export class NotificationService {
     return this.prisma.notification.findMany({
       where: { userId },
       orderBy: { createdAt: 'desc' },
+    });
+  }
+
+  async markNotificationAsRead(id: string, userId: number) {
+    const notification = await this.prisma.notification.findUnique({
+      where: { id },
+    });
+
+    if (!notification) {
+      throw new NotFoundException('Notification not found');
+    }
+
+    if (notification.userId !== userId) {
+      throw new ForbiddenException('Not authorized to modify this notification');
+    }
+
+    return this.prisma.notification.update({
+      where: { id },
+      data: { isRead: true },
     });
   }
 }
