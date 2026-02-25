@@ -28,6 +28,7 @@
     "typescript": "^5.9.3"
   },
   "devDependencies": {
-    "@prisma/internals": "^7.4.1"
+    "@prisma/internals": "^7.4.1",
+    "@types/bcrypt": "^6.0.0"
   }
 }
