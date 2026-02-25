@@ -42,6 +42,7 @@ model Complaint {
   title String
   description String
   status ComplaintStatus
+  remarks String
   category String
   attachment String?
   userId Int
