@@ -19,6 +19,7 @@ import { Roles } from '../auth/roles.decorator';
 import { RolesGuard } from '../auth/roles.guard';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { CreateComplaintDto } from './create-complaint.dto';
+import { AssignDepartmentDto } from './assign-department.dto';
 import { ComplaintService } from './complaint.service';
 import { UpdateComplaintDto } from './update-complaint.dto';
 
@@ -70,5 +71,15 @@ export class ComplaintController {
 			updateComplaintDto,
 			{ id: user.id, role: user.role },
 		);
+	}
+
+	@Patch(':id/assign-department')
+	@UseGuards(JwtAuthGuard, RolesGuard)
+	@Roles(Role.ADMIN)
+	async assignDepartment(
+		@Param('id', ParseIntPipe) id: number,
+		@Body() assignDepartmentDto: AssignDepartmentDto,
+	) {
+		return this.complaintService.assignDepartment(id, assignDepartmentDto);
 	}
 }

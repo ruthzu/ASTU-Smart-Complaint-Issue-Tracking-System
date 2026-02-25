@@ -1,9 +1,11 @@
 import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { ComplaintStatus, Role } from '@prisma/client';
+import { Prisma } from '@prisma/client';
 
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateComplaintDto } from './create-complaint.dto';
 import { UpdateComplaintDto } from './update-complaint.dto';
+import { AssignDepartmentDto } from './assign-department.dto';
 
 @Injectable()
 export class ComplaintService {
@@ -48,5 +50,19 @@ export class ComplaintService {
 			where: { id },
 			data: updateComplaintDto,
 		});
+	}
+
+	async assignDepartment(id: number, assignDepartmentDto: AssignDepartmentDto) {
+		try {
+			return await this.prisma.complaint.update({
+				where: { id },
+				data: { departmentId: assignDepartmentDto.departmentId },
+			});
+		} catch (error) {
+			if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2025') {
+				throw new NotFoundException('Complaint not found');
+			}
+			throw error;
+		}
 	}
 }
