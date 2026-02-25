@@ -1,4 +1,5 @@
 import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
+import { Prisma } from '@prisma/client';
 
 import { PrismaService } from '../prisma/prisma.service';
 
@@ -17,11 +18,31 @@ export class NotificationService {
     });
   }
 
-  async getNotificationsForUser(userId: number) {
-    return this.prisma.notification.findMany({
-      where: { userId },
-      orderBy: { createdAt: 'desc' },
-    });
+  async getNotificationsForUser(userId: number, page = 1, limit = 10, unread?: boolean) {
+    if (page < 1 || limit < 1) {
+      throw new BadRequestException('page and limit must be positive');
+    }
+
+    const skip = (page - 1) * limit;
+
+    const where: Prisma.NotificationWhereInput = { userId };
+    if (unread === true) {
+      where.isRead = false;
+    } else if (unread === false) {
+      where.isRead = true;
+    }
+
+    const [items, total] = await this.prisma.$transaction([
+      this.prisma.notification.findMany({
+        where,
+        orderBy: { createdAt: 'desc' },
+        skip,
+        take: limit,
+      }),
+      this.prisma.notification.count({ where }),
+    ]);
+
+    return { items, total, page, limit };
   }
 
   async markNotificationAsRead(id: string, userId: number) {
