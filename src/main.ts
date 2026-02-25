@@ -5,9 +5,10 @@ import { Module } from '@nestjs/common';
 import { UserModule } from './user/user.module';
 import { AuthModule } from './auth/auth.module';
 import { ComplaintModule } from './complaint/complaint.module';
+import { DepartmentModule } from './department/department.module';
 
 @Module({
-  imports: [UserModule, AuthModule, ComplaintModule],
+  imports: [UserModule, AuthModule, ComplaintModule, DepartmentModule],
 })
 class AppModule {}
 
