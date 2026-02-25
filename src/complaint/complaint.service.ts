@@ -15,7 +15,8 @@ export class ComplaintService {
 				...createComplaintDto,
 				userId,
 				status: ComplaintStatus.OPEN,
-				remarks: '',
+				remarks: createComplaintDto.remarks ?? null,
+				attachment: createComplaintDto.attachment ?? null,
 			},
 		});
 	}

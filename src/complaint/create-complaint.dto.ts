@@ -16,4 +16,8 @@ export class CreateComplaintDto {
   @IsString()
   @IsOptional()
   attachment?: string;
+
+  @IsString()
+  @IsOptional()
+  remarks?: string;
 }

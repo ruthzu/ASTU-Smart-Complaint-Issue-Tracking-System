@@ -10,7 +10,9 @@ import {
 	UnauthorizedException,
 	UseGuards,
 } from '@nestjs/common';
-import type { Request } from 'express';
+import type { Request, Express } from 'express';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { UploadedFile, UseInterceptors } from '@nestjs/common';
 
 import { Role } from '@prisma/client';
 import { Roles } from '../auth/roles.decorator';
@@ -26,8 +28,10 @@ export class ComplaintController {
 
 	@Post()
 	@UseGuards(JwtAuthGuard)
+	@UseInterceptors(FileInterceptor('file'))
 	async createComplaint(
 		@Body() createComplaintDto: CreateComplaintDto,
+		@UploadedFile() file: Express.Multer.File | undefined,
 		@Req() request: Request,
 	) {
 		const user = request.user as { id: number } | undefined;
@@ -35,7 +39,12 @@ export class ComplaintController {
 			throw new UnauthorizedException('User not authenticated');
 		}
 
-		return this.complaintService.createComplaint(createComplaintDto, user.id);
+		const dto: CreateComplaintDto = { ...createComplaintDto };
+		if (file?.filename) {
+			dto.attachment = file.filename;
+		}
+
+		return this.complaintService.createComplaint(dto, user.id);
 	}
 
 	@Get()
