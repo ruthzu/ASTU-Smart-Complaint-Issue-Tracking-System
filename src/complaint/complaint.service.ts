@@ -6,13 +6,17 @@ import { PrismaService } from '../prisma/prisma.service';
 import { CreateComplaintDto } from './create-complaint.dto';
 import { UpdateComplaintDto } from './update-complaint.dto';
 import { AssignDepartmentDto } from './assign-department.dto';
+import { NotificationService } from '../notification/notification.service';
 
 @Injectable()
 export class ComplaintService {
-	constructor(private readonly prisma: PrismaService) {}
+	constructor(
+		private readonly prisma: PrismaService,
+		private readonly notificationService: NotificationService,
+	) {}
 
 	async createComplaint(createComplaintDto: CreateComplaintDto, userId: number) {
-		return this.prisma.complaint.create({
+		const complaint = await this.prisma.complaint.create({
 			data: {
 				...createComplaintDto,
 				userId,
@@ -21,6 +25,22 @@ export class ComplaintService {
 				attachment: createComplaintDto.attachment ?? null,
 			},
 		});
+
+		const admins = await this.prisma.user.findMany({
+			where: { role: Role.ADMIN },
+			select: { id: true },
+		});
+
+		await Promise.all(
+			admins.map((admin) =>
+				this.notificationService.createNotification(
+					admin.id.toString(),
+					`New complaint submitted: ${complaint.title}`,
+				),
+			),
+		);
+
+		return complaint;
 	}
 
 	async listComplaints() {
@@ -50,7 +70,7 @@ export class ComplaintService {
 	) {
 		const complaint = await this.prisma.complaint.findUnique({
 			where: { id },
-			select: { assignedStaffId: true },
+			select: { assignedStaffId: true, status: true, userId: true, title: true },
 		});
 		if (!complaint) {
 			throw new NotFoundException('Complaint not found');
@@ -62,10 +82,41 @@ export class ComplaintService {
 			}
 		}
 
-		return this.prisma.complaint.update({
+		const updatedComplaint = await this.prisma.complaint.update({
 			where: { id },
 			data: updateComplaintDto,
 		});
+
+		const notifications: Array<Promise<unknown>> = [];
+
+		if (
+			updateComplaintDto.assignedStaffId !== undefined &&
+			updateComplaintDto.assignedStaffId !== complaint.assignedStaffId &&
+			updateComplaintDto.assignedStaffId !== null
+		) {
+			notifications.push(
+				this.notificationService.createNotification(
+					updateComplaintDto.assignedStaffId.toString(),
+					`You have been assigned a complaint: ${complaint.title}`,
+				),
+			);
+		}
+
+		if (
+			updateComplaintDto.status !== undefined &&
+			updateComplaintDto.status !== complaint.status
+		) {
+			notifications.push(
+				this.notificationService.createNotification(
+					complaint.userId.toString(),
+					`Your complaint status changed to ${updateComplaintDto.status}`,
+				),
+			);
+		}
+
+		await Promise.all(notifications);
+
+		return updatedComplaint;
 	}
 
 	async assignDepartment(id: number, assignDepartmentDto: AssignDepartmentDto) {
