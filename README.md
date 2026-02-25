@@ -17,6 +17,7 @@ This is a NestJS project scaffold. No business logic has been added yet.
 
 - `src/` - Source code folder
 - `src/main.ts` - Entry point
+- `prisma/schema.prisma` - Prisma models (User, Department, Complaint)
 
 ## Requirements
 

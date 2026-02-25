@@ -16,10 +16,38 @@ enum Role {
   ADMIN
 }
 
+enum ComplaintStatus {
+  OPEN
+  IN_PROGRESS
+  RESOLVED
+}
+
 model User {
   id    Int    @id @default(autoincrement())
   name  String
   email String @unique
   role  Role
   password String
+  complaints Complaint[]
+}
+
+model Department {
+  id Int @id @default(autoincrement())
+  name String
+  complaints Complaint[]
+}
+
+model Complaint {
+  id Int @id @default(autoincrement())
+  title String
+  description String
+  status ComplaintStatus
+  category String
+  attachment String?
+  userId Int
+  user User @relation(fields: [userId], references: [id])
+  departmentId Int?
+  department Department? @relation(fields: [departmentId], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
