@@ -27,6 +27,22 @@ export class ComplaintService {
 		return this.prisma.complaint.findMany();
 	}
 
+	async listComplaintsForUser(
+		currentUser: { id: number; role: Role },
+		departmentId?: number,
+	) {
+		const where: Prisma.ComplaintWhereInput = {};
+		if (departmentId) {
+			where.departmentId = departmentId;
+		}
+
+		if (currentUser.role === Role.STAFF) {
+			where.assignedStaffId = currentUser.id;
+		}
+
+		return this.prisma.complaint.findMany({ where });
+	}
+
 	async updateComplaint(
 		id: number,
 		updateComplaintDto: UpdateComplaintDto,

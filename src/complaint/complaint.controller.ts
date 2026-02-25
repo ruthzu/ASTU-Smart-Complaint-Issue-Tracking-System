@@ -2,12 +2,14 @@ import {
 	Body,
 	Controller,
 	Get,
+	Query,
 	Param,
 	ParseIntPipe,
 	Patch,
 	Post,
 	Req,
 	UnauthorizedException,
+	BadRequestException,
 	UseGuards,
 } from '@nestjs/common';
 import type { Request, Express } from 'express';
@@ -51,6 +53,30 @@ export class ComplaintController {
 	@Get()
 	async listComplaints() {
 		return this.complaintService.listComplaints();
+	}
+
+	@Get('staff')
+	@UseGuards(JwtAuthGuard, RolesGuard)
+	@Roles(Role.STAFF, Role.ADMIN)
+	async listComplaintsForStaff(
+		@Req() request: Request,
+		@Query('departmentId') departmentId?: string,
+	) {
+		const user = request.user as { id: number; role: Role } | undefined;
+		if (!user?.id || !user.role) {
+			throw new UnauthorizedException('User not authenticated');
+		}
+
+		let deptId: number | undefined;
+		if (departmentId !== undefined) {
+			const parsed = Number(departmentId);
+			if (Number.isNaN(parsed) || parsed < 1) {
+				throw new BadRequestException('departmentId must be a positive number');
+			}
+			deptId = parsed;
+		}
+
+		return this.complaintService.listComplaintsForUser({ id: user.id, role: user.role }, deptId);
 	}
 
 	@Patch(':id')
