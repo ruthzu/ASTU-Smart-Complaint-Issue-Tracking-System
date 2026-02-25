@@ -6,9 +6,10 @@ import { UserModule } from './user/user.module';
 import { AuthModule } from './auth/auth.module';
 import { ComplaintModule } from './complaint/complaint.module';
 import { DepartmentModule } from './department/department.module';
+import { NotificationModule } from './notification/notification.module';
 
 @Module({
-  imports: [UserModule, AuthModule, ComplaintModule, DepartmentModule],
+  imports: [UserModule, AuthModule, ComplaintModule, DepartmentModule, NotificationModule],
 })
 class AppModule {}
 
