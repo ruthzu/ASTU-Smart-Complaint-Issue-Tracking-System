@@ -35,3 +35,5 @@ This is a NestJS project scaffold. No business logic has been added yet.
 
 - `POST /auth/register`
 - `POST /auth/login`
+- `GET /auth/profile` (JWT required)
+- `GET /auth/admin-only` (JWT + ADMIN role)

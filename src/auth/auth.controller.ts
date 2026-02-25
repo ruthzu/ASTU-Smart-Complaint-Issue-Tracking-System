@@ -3,6 +3,9 @@ import { AuthService } from './auth.service';
 import { RegisterDto } from './register.dto';
 import { LoginDto } from './login.dto';
 import { JwtAuthGuard } from './jwt-auth.guard';
+import { Roles } from './roles.decorator';
+import { RolesGuard } from './roles.guard';
+import { Role } from '@prisma/client';
 
 @Controller('auth')
 export class AuthController {
@@ -22,5 +25,12 @@ export class AuthController {
 	@Get('profile')
 	getProfile(@Req() req: { user: unknown }) {
 		return req.user;
+	}
+
+	@UseGuards(JwtAuthGuard, RolesGuard)
+	@Roles(Role.ADMIN)
+	@Get('admin-only')
+	getAdminOnly() {
+		return { ok: true };
 	}
 }
