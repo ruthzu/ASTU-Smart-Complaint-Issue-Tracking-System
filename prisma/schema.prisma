@@ -29,6 +29,7 @@ model User {
   role  Role
   password String
   complaints Complaint[]
+  assignedComplaints Complaint[] @relation("AssignedStaff")
 }
 
 model Department {
@@ -47,6 +48,8 @@ model Complaint {
   attachment String?
   userId Int
   user User @relation(fields: [userId], references: [id])
+  assignedStaffId Int?
+  assignedStaff User? @relation("AssignedStaff", fields: [assignedStaffId], references: [id])
   departmentId Int?
   department Department? @relation(fields: [departmentId], references: [id])
   createdAt DateTime @default(now())

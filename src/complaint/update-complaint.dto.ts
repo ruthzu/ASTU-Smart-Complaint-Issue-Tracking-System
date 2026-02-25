@@ -1,4 +1,5 @@
-import { IsEnum, IsNotEmpty, IsOptional, IsString } from 'class-validator';
+import { Type } from 'class-transformer';
+import { IsEnum, IsInt, IsNotEmpty, IsOptional, IsString, Min } from 'class-validator';
 import { ComplaintStatus } from '@prisma/client';
 
 export class UpdateComplaintDto {
@@ -13,4 +14,10 @@ export class UpdateComplaintDto {
   @IsString()
   @IsOptional()
   attachment?: string;
+
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  @IsOptional()
+  assignedStaffId?: number;
 }

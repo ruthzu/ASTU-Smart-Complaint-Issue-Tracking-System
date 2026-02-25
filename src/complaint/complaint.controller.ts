@@ -49,7 +49,17 @@ export class ComplaintController {
 	async updateComplaint(
 		@Param('id', ParseIntPipe) id: number,
 		@Body() updateComplaintDto: UpdateComplaintDto,
+		@Req() request: Request,
 	) {
-		return this.complaintService.updateComplaint(id, updateComplaintDto);
+		const user = request.user as { id: number; role: Role } | undefined;
+		if (!user?.id || !user.role) {
+			throw new UnauthorizedException('User not authenticated');
+		}
+
+		return this.complaintService.updateComplaint(
+			id,
+			updateComplaintDto,
+			{ id: user.id, role: user.role },
+		);
 	}
 }
