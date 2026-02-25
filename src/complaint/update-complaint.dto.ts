@@ -6,8 +6,9 @@ export class UpdateComplaintDto {
   status!: ComplaintStatus;
 
   @IsString()
+  @IsOptional()
   @IsNotEmpty()
-  remarks!: string;
+  remarks?: string;
 
   @IsString()
   @IsOptional()

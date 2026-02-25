@@ -2,6 +2,9 @@ import {
 	Body,
 	Controller,
 	Get,
+	Param,
+	ParseIntPipe,
+	Patch,
 	Post,
 	Req,
 	UnauthorizedException,
@@ -9,9 +12,13 @@ import {
 } from '@nestjs/common';
 import type { Request } from 'express';
 
+import { Role } from '@prisma/client';
+import { Roles } from '../auth/roles.decorator';
+import { RolesGuard } from '../auth/roles.guard';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { CreateComplaintDto } from './create-complaint.dto';
 import { ComplaintService } from './complaint.service';
+import { UpdateComplaintDto } from './update-complaint.dto';
 
 @Controller('complaints')
 export class ComplaintController {
@@ -34,5 +41,15 @@ export class ComplaintController {
 	@Get()
 	async listComplaints() {
 		return this.complaintService.listComplaints();
+	}
+
+	@Patch(':id')
+	@UseGuards(JwtAuthGuard, RolesGuard)
+	@Roles(Role.STAFF, Role.ADMIN)
+	async updateComplaint(
+		@Param('id', ParseIntPipe) id: number,
+		@Body() updateComplaintDto: UpdateComplaintDto,
+	) {
+		return this.complaintService.updateComplaint(id, updateComplaintDto);
 	}
 }

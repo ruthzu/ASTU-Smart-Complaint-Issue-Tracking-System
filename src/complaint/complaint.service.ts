@@ -3,6 +3,7 @@ import { ComplaintStatus } from '@prisma/client';
 
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateComplaintDto } from './create-complaint.dto';
+import { UpdateComplaintDto } from './update-complaint.dto';
 
 @Injectable()
 export class ComplaintService {
@@ -21,5 +22,12 @@ export class ComplaintService {
 
 	async listComplaints() {
 		return this.prisma.complaint.findMany();
+	}
+
+	async updateComplaint(id: number, updateComplaintDto: UpdateComplaintDto) {
+		return this.prisma.complaint.update({
+			where: { id },
+			data: updateComplaintDto,
+		});
 	}
 }
