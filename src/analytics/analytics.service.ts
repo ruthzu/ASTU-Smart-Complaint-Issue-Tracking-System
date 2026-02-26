@@ -1,3 +1,38 @@
+  // Get complaint counts grouped by category and department
+  async getComplaintsByCategoryOrDepartment() {
+    // Group by category
+    const categoryGroups = await this.prisma.complaint.groupBy({
+      by: ['category'],
+      _count: { category: true },
+    });
+    const categoryCounts: { [key: string]: number } = {};
+    for (const group of categoryGroups) {
+      categoryCounts[group.category] = group._count.category;
+    }
+
+    // Group by department (join with department name)
+    const departmentGroups = await this.prisma.complaint.groupBy({
+      by: ['departmentId'],
+      _count: { departmentId: true },
+    });
+    // Fetch department names
+    const departmentIds = departmentGroups.map(g => g.departmentId).filter(id => id !== null);
+    let departments: { id: number, name: string }[] = [];
+    if (departmentIds.length > 0) {
+      departments = await this.prisma.department.findMany({
+        where: { id: { in: departmentIds } },
+        select: { id: true, name: true },
+      });
+    }
+    const departmentMap = Object.fromEntries(departments.map(d => [d.id, d.name]));
+    const departmentCounts: { [key: string]: number } = {};
+    for (const group of departmentGroups) {
+      const name = group.departmentId ? departmentMap[group.departmentId] : 'Unassigned';
+      departmentCounts[name] = group._count.departmentId;
+    }
+
+    return { categoryCounts, departmentCounts };
+  }
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 
