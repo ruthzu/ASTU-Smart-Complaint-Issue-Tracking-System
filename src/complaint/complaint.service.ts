@@ -26,19 +26,11 @@ export class ComplaintService {
 			},
 		});
 
-		const admins = await this.prisma.user.findMany({
-			where: { role: Role.ADMIN },
-			select: { id: true },
+		// Notify all admins (in-app + email)
+		await this.notificationService.notifyAdminsOnComplaintCreated({
+			title: complaint.title,
+			description: complaint.description,
 		});
-
-		await Promise.all(
-			admins.map((admin) =>
-				this.notificationService.createNotification(
-					admin.id.toString(),
-					`New complaint submitted: ${complaint.title}`,
-				),
-			),
-		);
 
 		return complaint;
 	}
@@ -105,10 +97,11 @@ export class ComplaintService {
 			updateComplaintDto.assignedStaffId !== complaint.assignedStaffId &&
 			updateComplaintDto.assignedStaffId !== null
 		) {
+			// Notify assigned staff (in-app + email)
 			notifications.push(
-				this.notificationService.createNotification(
-					updateComplaintDto.assignedStaffId.toString(),
-					`You have been assigned a complaint: ${complaint.title}`,
+				this.notificationService.notifyStaffOnComplaintAssigned(
+					updateComplaintDto.assignedStaffId,
+					{ title: complaint.title, description: updateComplaintDto.description ?? '' },
 				),
 			);
 		}
@@ -117,10 +110,16 @@ export class ComplaintService {
 			updateComplaintDto.status !== undefined &&
 			updateComplaintDto.status !== complaint.status
 		) {
+			// Notify student (in-app + email)
+			const student = await this.prisma.user.findUnique({ where: { id: complaint.userId } });
 			notifications.push(
-				this.notificationService.createNotification(
-					complaint.userId.toString(),
-					`Your complaint status changed to ${updateComplaintDto.status}`,
+				this.notificationService.notifyStudentOnStatusUpdate(
+					complaint.userId,
+					{
+						title: complaint.title,
+						status: updateComplaintDto.status,
+						email: student?.email || '',
+					},
 				),
 			);
 		}
