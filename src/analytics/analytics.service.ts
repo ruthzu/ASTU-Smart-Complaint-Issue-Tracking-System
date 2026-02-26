@@ -1,3 +1,72 @@
+      // Get complaints assigned and resolved per staff member
+      async getComplaintsPerStaff() {
+        // Get all staff users
+        const staff = await this.prisma.user.findMany({
+          where: { role: 'STAFF' },
+          select: { id: true, name: true },
+        });
+        if (staff.length === 0) return [];
+
+        // Get assigned complaints grouped by staff
+        const assignedGroups = await this.prisma.complaint.groupBy({
+          by: ['assignedStaffId'],
+          _count: { _all: true },
+          where: { assignedStaffId: { in: staff.map(s => s.id) } },
+        });
+        const resolvedGroups = await this.prisma.complaint.groupBy({
+          by: ['assignedStaffId'],
+          _count: { _all: true },
+          where: { assignedStaffId: { in: staff.map(s => s.id) }, status: 'RESOLVED' },
+        });
+        const assignedMap = Object.fromEntries(assignedGroups.map(g => [g.assignedStaffId, g._count._all]));
+        const resolvedMap = Object.fromEntries(resolvedGroups.map(g => [g.assignedStaffId, g._count._all]));
+
+        return staff.map(s => ({
+          staffName: s.name,
+          totalAssigned: assignedMap[s.id] || 0,
+          resolved: resolvedMap[s.id] || 0,
+        }));
+      }
+    // Get overall and per-department resolution rates
+    async getResolutionRate() {
+      // Overall counts
+      const [total, resolved] = await Promise.all([
+        this.prisma.complaint.count(),
+        this.prisma.complaint.count({ where: { status: 'RESOLVED' } }),
+      ]);
+      const overallRate = total > 0 ? (resolved / total) * 100 : 0;
+
+      // Per-department counts
+      const departmentGroups = await this.prisma.complaint.groupBy({
+        by: ['departmentId'],
+        _count: { _all: true },
+        where: { departmentId: { not: null } },
+      });
+      const resolvedGroups = await this.prisma.complaint.groupBy({
+        by: ['departmentId'],
+        _count: { _all: true },
+        where: { status: 'RESOLVED', departmentId: { not: null } },
+      });
+      const departmentIds = departmentGroups.map(g => g.departmentId);
+      let departments: { id: number, name: string }[] = [];
+      if (departmentIds.length > 0) {
+        departments = await this.prisma.department.findMany({
+          where: { id: { in: departmentIds } },
+          select: { id: true, name: true },
+        });
+      }
+      const departmentMap = Object.fromEntries(departments.map(d => [d.id, d.name]));
+      const resolvedMap = Object.fromEntries(resolvedGroups.map(g => [g.departmentId, g._count._all]));
+      const departmentRates: { [key: string]: number } = {};
+      for (const group of departmentGroups) {
+        const name = departmentMap[group.departmentId] || 'Unknown';
+        const deptTotal = group._count._all;
+        const deptResolved = resolvedMap[group.departmentId] || 0;
+        departmentRates[name] = deptTotal > 0 ? (deptResolved / deptTotal) * 100 : 0;
+      }
+
+      return { overallRate, departmentRates };
+    }
   // Get complaint counts grouped by category and department
   async getComplaintsByCategoryOrDepartment() {
     // Group by category

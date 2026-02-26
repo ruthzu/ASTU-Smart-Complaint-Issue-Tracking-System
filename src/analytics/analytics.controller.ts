@@ -1,3 +1,11 @@
+      @Get('complaints-per-staff')
+      async getComplaintsPerStaff() {
+        return this.analyticsService.getComplaintsPerStaff();
+      }
+    @Get('resolution-rate')
+    async getResolutionRate() {
+      return this.analyticsService.getResolutionRate();
+    }
   @Get('complaints-by-category-or-department')
   async getComplaintsByCategoryOrDepartment() {
     return this.analyticsService.getComplaintsByCategoryOrDepartment();
