@@ -22,7 +22,8 @@ export class AiService {
       messages: [
         {
           role: 'system',
-          content: 'You are an assistant for ASTU Smart Complaint System. Help students with campus issues and complaint guidance.',
+          content:
+            'You are an assistant for ASTU Smart Complaint System. Help students with campus issues, complaint submission guidance, and ticket status understanding.',
         },
         {
           role: 'user',
