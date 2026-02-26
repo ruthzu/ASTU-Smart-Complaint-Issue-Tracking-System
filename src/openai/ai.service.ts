@@ -21,8 +21,13 @@ export class AiService {
   }
 
   async askAI(message: string, userId?: number) {
-    const baseSystemPrompt =
-      'You are an assistant for ASTU Smart Complaint System. Help students with campus issues, complaint submission guidance, and ticket status understanding.';
+    const baseSystemPrompt = [
+      'You are an assistant for ASTU Smart Complaint System.',
+      'Help students with campus issues, complaint submission guidance, and ticket status understanding.',
+      'Only answer questions related to ASTU campus issues; if a question is unrelated, politely refuse.',
+      'Do not provide medical, legal, or financial advice.',
+      'Keep answers concise and helpful.',
+    ].join(' ');
 
     let complaintContext = '';
 
