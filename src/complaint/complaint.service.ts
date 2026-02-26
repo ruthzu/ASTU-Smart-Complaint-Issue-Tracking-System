@@ -98,10 +98,12 @@ export class ComplaintService {
 			updateComplaintDto.assignedStaffId !== null
 		) {
 			// Notify assigned staff (in-app + email)
+			// Use complaint description from DB, since UpdateComplaintDto does not have description
+			const dbComplaint = await this.prisma.complaint.findUnique({ where: { id } });
 			notifications.push(
 				this.notificationService.notifyStaffOnComplaintAssigned(
 					updateComplaintDto.assignedStaffId,
-					{ title: complaint.title, description: updateComplaintDto.description ?? '' },
+					{ title: complaint.title, description: dbComplaint?.description ?? '' },
 				),
 			);
 		}
