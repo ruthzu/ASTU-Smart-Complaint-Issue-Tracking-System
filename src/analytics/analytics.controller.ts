@@ -9,4 +9,9 @@ export class AnalyticsController {
   async getCounts() {
     return this.analyticsService.getCounts();
   }
+
+  @Get('complaint-status-counts')
+  async getComplaintStatusCounts() {
+    return this.analyticsService.getComplaintStatusCounts();
+  }
 }
