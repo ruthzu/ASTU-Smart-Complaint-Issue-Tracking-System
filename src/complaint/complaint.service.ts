@@ -43,8 +43,19 @@ export class ComplaintService {
 		return complaint;
 	}
 
-	async listComplaints() {
-		return this.prisma.complaint.findMany();
+	async listComplaintsPaginated(page: number, limit: number) {
+		const skip = (page - 1) * limit;
+		const [items, total] = await Promise.all([
+			this.prisma.complaint.findMany({ skip, take: limit }),
+			this.prisma.complaint.count(),
+		]);
+		return {
+			items,
+			total,
+			page,
+			limit,
+			pageCount: Math.ceil(total / limit),
+		};
 	}
 
 	async listComplaintsForUser(

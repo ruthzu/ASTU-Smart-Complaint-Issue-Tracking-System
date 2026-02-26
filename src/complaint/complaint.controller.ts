@@ -51,8 +51,13 @@ export class ComplaintController {
 	}
 
 	@Get()
-	async listComplaints() {
-		return this.complaintService.listComplaints();
+	async listComplaints(
+		@Query('page') page: string = '1',
+		@Query('limit') limit: string = '10',
+	) {
+		const pageNum = Math.max(1, parseInt(page, 10) || 1);
+		const limitNum = Math.max(1, parseInt(limit, 10) || 10);
+		return this.complaintService.listComplaintsPaginated(pageNum, limitNum);
 	}
 
 	@Get('staff')
