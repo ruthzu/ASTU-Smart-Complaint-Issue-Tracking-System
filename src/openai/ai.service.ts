@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import OpenAI from 'openai';
 import { PrismaService } from '../prisma/prisma.service';
@@ -60,6 +60,14 @@ export class AiService {
         },
       ],
       temperature: 0.4,
+    }).catch((err: unknown) => {
+      // Map OpenAI quota/rate errors to a clearer HTTP response.
+      const message = err instanceof Error ? err.message : 'OpenAI request failed';
+      const status = (err as { status?: number })?.status;
+      if (status === 429) {
+        throw new HttpException('OpenAI rate limit or quota exceeded. Please try again later.', HttpStatus.TOO_MANY_REQUESTS);
+      }
+      throw new HttpException(message, HttpStatus.BAD_GATEWAY);
     });
 
     const content = response.choices[0]?.message?.content;

@@ -17,4 +17,20 @@ export class OpenAIService {
   getClient(): OpenAI {
     return this.client;
   }
+
+
+async askAI(message: string) {
+  // Mock responses for testing Phase 6
+  if (message.toLowerCase().includes("complaint")) {
+    return "You can submit a complaint via the ASTU portal under Complaints section.";
+  }
+  if (message.toLowerCase().includes("status")) {
+    return "You can check your complaint status in your dashboard under Complaints.";
+  }
+  if (message.toLowerCase().includes("dorm")) {
+    return "Please submit a complaint to the Facilities department about your dorm.";
+  }
+  // Refuse unrelated
+  return "I am only able to answer ASTU campus-related questions.";
+}
 }
