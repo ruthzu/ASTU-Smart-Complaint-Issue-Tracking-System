@@ -1,4 +1,5 @@
-import { Body, Controller, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Post, Req, UseGuards } from '@nestjs/common';
+import type { Request } from 'express';
 
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { Roles } from '../auth/roles.decorator';
@@ -13,8 +14,9 @@ export class ChatbotController {
   @Post()
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('STUDENT')
-  async askChatbot(@Body() body: ChatbotMessageDto) {
-    const reply = await this.aiService.askAI(body.message);
+  async askChatbot(@Body() body: ChatbotMessageDto, @Req() req: Request) {
+    const user = req.user as { id?: number } | undefined;
+    const reply = await this.aiService.askAI(body.message, user?.id);
     return { response: reply };
   }
 }
