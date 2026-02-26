@@ -14,6 +14,7 @@ import {
 } from '@nestjs/common';
 import type { Request, Express } from 'express';
 import { FileInterceptor } from '@nestjs/platform-express';
+import { complaintFileMulterOptions } from './complaint-file-upload.options';
 import { UploadedFile, UseInterceptors } from '@nestjs/common';
 
 import { Role } from '@prisma/client';
@@ -31,7 +32,7 @@ export class ComplaintController {
 
 	@Post()
 	@UseGuards(JwtAuthGuard)
-	@UseInterceptors(FileInterceptor('file'))
+	@UseInterceptors(FileInterceptor('file', complaintFileMulterOptions))
 	async createComplaint(
 		@Body() createComplaintDto: CreateComplaintDto,
 		@UploadedFile() file: Express.Multer.File | undefined,
@@ -40,6 +41,17 @@ export class ComplaintController {
 		const user = request.user as { id: number } | undefined;
 		if (!user?.id) {
 			throw new UnauthorizedException('User not authenticated');
+		}
+
+		// Additional manual validation (should not be needed, but for safety)
+		if (file) {
+			const allowedTypes = ['image/jpeg', 'image/png', 'application/pdf'];
+			if (!allowedTypes.includes(file.mimetype)) {
+				throw new BadRequestException('Only jpg, png, and pdf files are allowed');
+			}
+			if (file.size > 5 * 1024 * 1024) {
+				throw new BadRequestException('File size exceeds 5MB');
+			}
 		}
 
 		const dto: CreateComplaintDto = { ...createComplaintDto };
