@@ -1,3 +1,7 @@
+  @Get('complaints-by-category-or-department')
+  async getComplaintsByCategoryOrDepartment() {
+    return this.analyticsService.getComplaintsByCategoryOrDepartment();
+  }
 import { Controller, Get } from '@nestjs/common';
 import { AnalyticsService } from './analytics.service';
 
