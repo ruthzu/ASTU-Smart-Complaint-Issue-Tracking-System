@@ -1,7 +1,6 @@
 import { NestFactory } from '@nestjs/core';
-import { ValidationPipe } from '@nestjs/common';
-
-import { Module } from '@nestjs/common';
+import { Module, ValidationPipe } from '@nestjs/common';
+import { ConfigModule } from '@nestjs/config';
 import { UserModule } from './user/user.module';
 import { AuthModule } from './auth/auth.module';
 import { ComplaintModule } from './complaint/complaint.module';
@@ -10,7 +9,17 @@ import { NotificationModule } from './notification/notification.module';
 import { OpenAIModule } from './openai/openai.module';
 
 @Module({
-  imports: [UserModule, AuthModule, ComplaintModule, DepartmentModule, NotificationModule, OpenAIModule],
+  imports: [
+    ConfigModule.forRoot({
+      isGlobal: true, // makes config available everywhere
+    }),
+    UserModule,
+    AuthModule,
+    ComplaintModule,
+    DepartmentModule,
+    NotificationModule,
+    OpenAIModule,
+  ],
 })
 class AppModule {}
 
