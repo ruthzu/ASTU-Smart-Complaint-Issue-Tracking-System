@@ -7,9 +7,10 @@ import { AuthModule } from './auth/auth.module';
 import { ComplaintModule } from './complaint/complaint.module';
 import { DepartmentModule } from './department/department.module';
 import { NotificationModule } from './notification/notification.module';
+import { OpenAIModule } from './openai/openai.module';
 
 @Module({
-  imports: [UserModule, AuthModule, ComplaintModule, DepartmentModule, NotificationModule],
+  imports: [UserModule, AuthModule, ComplaintModule, DepartmentModule, NotificationModule, OpenAIModule],
 })
 class AppModule {}
 
