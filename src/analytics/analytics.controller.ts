@@ -1,15 +1,3 @@
-      @Get('complaints-per-staff')
-      async getComplaintsPerStaff() {
-        return this.analyticsService.getComplaintsPerStaff();
-      }
-    @Get('resolution-rate')
-    async getResolutionRate() {
-      return this.analyticsService.getResolutionRate();
-    }
-  @Get('complaints-by-category-or-department')
-  async getComplaintsByCategoryOrDepartment() {
-    return this.analyticsService.getComplaintsByCategoryOrDepartment();
-  }
 
 import { Controller, Get, UseGuards } from '@nestjs/common';
 import { AnalyticsService } from './analytics.service';
@@ -21,6 +9,7 @@ import { Roles } from '../auth/roles.decorator';
 @UseGuards(JwtAuthGuard, RolesGuard)
 export class AnalyticsController {
   constructor(private readonly analyticsService: AnalyticsService) {}
+
   @Get()
   @Roles('ADMIN')
   async getAllAnalytics() {
@@ -41,13 +30,20 @@ export class AnalyticsController {
     };
   }
 
-  @Get('counts')
-  async getCounts() {
-    return this.analyticsService.getCounts();
+  @Get('complaints-per-staff')
+  async getComplaintsPerStaff() {
+    return this.analyticsService.getComplaintsPerStaff();
   }
 
-  @Get('complaint-status-counts')
-  async getComplaintStatusCounts() {
-    return this.analyticsService.getComplaintStatusCounts();
+  @Get('resolution-rate')
+  async getResolutionRate() {
+    return this.analyticsService.getResolutionRate();
+  }
+
+  @Get('complaints-by-category-or-department')
+  async getComplaintsByCategoryOrDepartment() {
+    return this.analyticsService.getComplaintsByCategoryOrDepartment();
   }
 }
+
+
