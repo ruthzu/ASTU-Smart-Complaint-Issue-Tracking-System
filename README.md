@@ -1,68 +1,177 @@
-# astu-smart-complaint-system
+# ASTU Smart Complaint System (Backend)
 
-This is a NestJS project scaffold. No business logic has been added yet.
+NestJS backend for complaint submission, assignment, tracking, notifications, analytics, and role-based access.
 
-## Getting Started
+## Tech Stack
 
-- Install dependencies: `npm install`
-- Run the project: `npx ts-node src/main.ts`
+- NestJS + TypeScript
+- Prisma ORM
+- PostgreSQL
+- JWT authentication (Passport)
+- Class-validator / class-transformer
+- Docker + Docker Compose
 
-## Environment Variables
+## Features
 
-- `DATABASE_URL` - PostgreSQL connection string
-- `JWT_SECRET` - Secret key for signing JWTs
-- `JWT_EXPIRES_IN` - Token expiration (e.g. `1h`, `15m`)
-- `OPENAI_API_KEY` - OpenAI API key for the official SDK
-
-Copy `.env.example` to `.env` and fill in the values before running the project.
+- User registration and login
+- JWT-protected profile and role-based authorization
+- Complaint creation and lifecycle updates
+- Department management
+- Notification management
+- Analytics endpoints
+- Chatbot endpoint
+- File upload support for complaints (`uploads/`)
 
 ## Project Structure
 
-- `src/` - Source code folder
-- `src/main.ts` - Entry point
-- `prisma/schema.prisma` - Prisma models (User, Department, Complaint)
+- `src/` - application source code
+- `prisma/` - Prisma schema and migrations
+- `uploads/` - uploaded files
+- `docker-compose.yml` - backend + postgres services
+- `Dockerfile` - production image build
 
-## Requirements
+## Environment Variables
 
-- Node.js
-- npm
+Copy `.env.example` to `.env` and set values:
 
-## OpenAI Setup
+- `DATABASE_URL`
+- `JWT_SECRET`
+- `JWT_EXPIRES_IN`
+- `OPENAI_API_KEY`
 
-- The official OpenAI SDK is installed and exposed via `OpenAIService` (global provider).
-- Add `OPENAI_API_KEY` to your `.env` (see `.env.example`).
-- Example usage inside a provider:
+If running with Docker Compose, use:
 
-```ts
-import { Injectable } from "@nestjs/common";
-import { OpenAIService } from "../openai/openai.service";
+`DATABASE_URL=postgresql://astuuser:astupass@db:5432/astudb?schema=public`
 
-@Injectable()
-export class ExampleService {
-  constructor(private readonly openAIService: OpenAIService) {}
+If connecting from host machine to Compose PostgreSQL port mapping (`5433:5432`), use:
 
-  async sampleCompletion() {
-    const client = this.openAIService.getClient();
-    const response = await client.responses.create({
-      model: "gpt-4.1-mini",
-      input: "Hello, OpenAI!",
-    });
-    return response;
-  }
-}
+`DATABASE_URL=postgresql://astuuser:astupass@localhost:5433/astudb?schema=public`
+
+## Run Locally (without Docker)
+
+1. Install dependencies:
+
+```bash
+npm install
 ```
 
-## Dependencies
+2. Apply migrations:
 
-- @nestjs/core
-- @nestjs/common
-- typescript
-- ts-node
-- @types/node
+```bash
+npx prisma migrate deploy
+```
 
-## Auth Endpoints
+3. Start app:
+
+```bash
+npm run start:dev
+```
+
+4. Seed sample data (optional):
+
+```bash
+npm run db:seed
+```
+
+5. App runs at:
+
+`http://localhost:3000`
+
+## Run with Docker Compose
+
+1. Start services:
+
+```bash
+docker compose up -d --build
+```
+
+2. Run migrations inside backend container:
+
+```bash
+docker compose exec backend npx prisma migrate deploy
+```
+
+3. Seed sample data inside backend container (optional):
+
+```bash
+docker compose exec backend npm run db:seed
+```
+
+4. Check status/logs:
+
+```bash
+docker compose ps
+docker compose logs -f backend
+```
+
+5. Stop services:
+
+```bash
+docker compose stop
+```
+
+## Scripts
+
+- `npm run start:dev` - run with ts-node
+- `npm run build` - compile TypeScript to `dist/`
+- `npm run db:seed` - insert/update sample users, department, complaint, and notification
+
+## Seeded Accounts
+
+After `npm run db:seed`, these users are available:
+
+- `admin@astu.edu.et` / `Admin@123`
+- `staff@astu.edu.et` / `Staff@123`
+- `student@astu.edu.et` / `Student@123`
+
+## API Endpoints
+
+### Auth
 
 - `POST /auth/register`
 - `POST /auth/login`
-- `GET /auth/profile` (JWT required)
-- `GET /auth/admin-only` (JWT + ADMIN role)
+- `GET /auth/profile` (JWT)
+- `GET /auth/admin-only` (JWT + ADMIN)
+
+### Users
+
+- `GET /users` (ADMIN)
+- `PATCH /users/:id` (ADMIN)
+- `DELETE /users/:id` (ADMIN)
+
+### Departments
+
+- `POST /departments` (ADMIN)
+- `GET /departments` (ADMIN)
+- `PATCH /departments/:id` (ADMIN)
+- `DELETE /departments/:id` (ADMIN)
+
+### Complaints
+
+- `POST /complaints` (JWT)
+- `GET /complaints`
+- `GET /complaints/staff` (STAFF/ADMIN)
+- `PATCH /complaints/:id` (STAFF/ADMIN)
+- `PATCH /complaints/:id/assign-department` (ADMIN)
+
+### Notifications
+
+- `GET /notifications` (JWT)
+- `PATCH /notifications/:id/read` (JWT)
+
+### Analytics
+
+- `GET /analytics` (ADMIN)
+- `GET /analytics/complaints-per-staff` (guarded)
+- `GET /analytics/resolution-rate` (guarded)
+- `GET /analytics/complaints-by-category-or-department` (guarded)
+
+### Chatbot
+
+- `POST /chatbot` (STUDENT)
+
+## Notes
+
+- Backend container exposes API on `3000`.
+- PostgreSQL container is mapped to host `5433`.
+- Uploaded complaint files are persisted in local `uploads/`.
